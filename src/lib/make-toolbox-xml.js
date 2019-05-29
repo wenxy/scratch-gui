@@ -716,7 +716,7 @@ const xmlClose = '</xml>';
 /**
  * @param {!boolean} isStage - Whether the toolbox is for a stage-type target.
  * @param {?string} targetId - The current editing target
- * @param {?Array.<object>} categoriesXML - optional array of `{id,xml}` for categories.
+ * @param {?Array.<object>|?string} categoriesXML - optional array of `{id,xml}` for categories, or legacy XML string.
  * @property {string} id - the extension / category ID.
  * @property {string} xml - the `<category>...</category>` XML for this extension / category.
  * @param {?string} costumeName - The name of the default selected costume dropdown.
@@ -731,6 +731,20 @@ const makeToolboxXML = function (isStage, targetId, categoriesXML = [],
     costumeName = xmlEscape(costumeName);
     backdropName = xmlEscape(backdropName);
     soundName = xmlEscape(soundName);
+
+    // Pre-e16n versions of the VM return a single string containing every category.
+    // Post-e16n versions of the VM return an array of `{id, xml}`, one per category.
+    // TODO: remove this once `vm.runtime.getBlocksXML()` returns an array of `{id, xml}` in `develop`.
+    if (typeof categoriesXML === 'string') {
+        const parser = new DOMParser();
+        const serializer = new XMLSerializer();
+        const categories =
+            parser.parseFromString(`<categories>${categoriesXML}</categories>`, 'application/xml');
+        categoriesXML = Array.prototype.map.call(categories.documentElement.childNodes, node => ({
+            id: node.id,
+            xml: serializer.serializeToString(node)
+        }));
+    }
 
     categoriesXML = categoriesXML.slice();
     const moveCategory = categoryId => {

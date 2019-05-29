@@ -530,11 +530,18 @@ class Blocks extends React.Component {
 
         // scratch-blocks implements a menu or custom field as a special kind of block
         // these actually define blocks and MUST run regardless of the UI state
-        defineBlocks(
-            Object.getOwnPropertyNames(categoryInfo.customFieldTypes)
-                .map(fieldTypeName => categoryInfo.customFieldTypes[fieldTypeName].scratchBlocksDefinition));
-        defineBlocks(categoryInfo.menus);
-        defineBlocks(categoryInfo.blocks);
+        if (categoryInfo.hasOwnProperty('blocks')) {
+            // new style: blocks, menus, and custom fields are each stored separately
+            defineBlocks(
+                Object.getOwnPropertyNames(categoryInfo.customFieldTypes)
+                    .map(fieldTypeName => categoryInfo.customFieldTypes[fieldTypeName].scratchBlocksDefinition));
+            defineBlocks(categoryInfo.menus);
+            defineBlocks(categoryInfo.blocks);
+        } else {
+            // old style: everything is stored as (pseudo-)blocks in one array
+            // TODO: remove this once `vm.runtime.getBlocksXML()` returns an array of `{id, xml}` in `develop`.
+            defineBlocks(categoryInfo);
+        }
 
         // Update the toolbox with new blocks if possible
         const toolboxXML = this.getToolboxXML();
