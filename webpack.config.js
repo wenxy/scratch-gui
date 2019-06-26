@@ -6,6 +6,7 @@ var webpack = require('webpack');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var WebpackPluginImport = require('webpack-plugin-import');
 
 // PostCss
 var autoprefixer = require('autoprefixer');
@@ -13,6 +14,8 @@ var postcssVars = require('postcss-simple-vars');
 var postcssImport = require('postcss-import');
 
 const STATIC_PATH = process.env.STATIC_PATH || '/static';
+
+const apiHost = 'http://localhost:8080/';
 
 const base = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -36,6 +39,19 @@ const base = {
     },
     module: {
         rules: [{
+            test: /\.scss$/,
+            use: [
+                {
+                    loader: 'style-loader'
+                },
+                {
+                    loader: 'css-loader'
+                },
+                {
+                    loader: 'sass-loader'
+                }
+            ]
+        },{
             test: /\.jsx?$/,
             loader: 'babel-loader',
             include: [
@@ -54,7 +70,12 @@ const base = {
                     '@babel/plugin-proposal-object-rest-spread',
                     ['react-intl', {
                         messagesDir: './translations/messages/'
-                    }]],
+                    }],
+                    ['babel-plugin-import', {
+                        libraryName: '@alifd/next', // 0.x 的话使用 @icedesign/base
+                        style: true
+                    }]
+                ],
                 presets: [
                     ['@babel/preset-env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}],
                     '@babel/preset-react'
@@ -99,7 +120,6 @@ const base = {
     },
     plugins: []
 };
-
 module.exports = [
     // to run editor examples
     defaultsDeep({}, base, {
@@ -147,26 +167,30 @@ module.exports = [
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'gui'],
                 template: 'src/playground/index.ejs',
-                title: 'Scratch 3.0 GUI',
-                sentryConfig: process.env.SENTRY_CONFIG ? '"' + process.env.SENTRY_CONFIG + '"' : null
+                title: '甜甜圈编程',
+                sentryConfig: process.env.SENTRY_CONFIG ? '"' + process.env.SENTRY_CONFIG + '"' : null,
+                host: apiHost
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'blocksonly'],
                 template: 'src/playground/index.ejs',
                 filename: 'blocks-only.html',
-                title: 'Scratch 3.0 GUI: Blocks Only Example'
+                title: 'Scratch 3.0 GUI: Blocks Only Example',
+                host: apiHost
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'compatibilitytesting'],
                 template: 'src/playground/index.ejs',
                 filename: 'compatibility-testing.html',
-                title: 'Scratch 3.0 GUI: Compatibility Testing'
+                title: 'Scratch 3.0 GUI: Compatibility Testing',
+                host: apiHost
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'player'],
                 template: 'src/playground/index.ejs',
                 filename: 'player.html',
-                title: 'Scratch 3.0 GUI: Player Example'
+                title: 'Scratch 3.0 GUI: Player Example',
+                host: apiHost
             }),
             new CopyWebpackPlugin([{
                 from: 'static',
@@ -184,7 +208,8 @@ module.exports = [
             new CopyWebpackPlugin([{
                 from: 'extension-worker.{js,js.map}',
                 context: 'node_modules/scratch-vm/dist/web'
-            }])
+            }]),
+            new WebpackPluginImport()
         ])
     })
 ].concat(

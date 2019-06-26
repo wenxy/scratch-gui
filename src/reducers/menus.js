@@ -18,6 +18,7 @@ const initialState = {
 
 const reducer = function (state, action) {
     if (typeof state === 'undefined') state = initialState;
+    // console.log('===>',state,action);
     switch (action.type) {
     case OPEN_MENU:
         return Object.assign({}, state, {
@@ -39,6 +40,12 @@ const closeMenu = menu => ({
     type: CLOSE_MENU,
     menu: menu
 });
+
+const showLogin = menu => ({
+    type: OPEN_MENU,
+    menu: menu
+});
+
 const openAccountMenu = () => openMenu(MENU_ACCOUNT);
 const closeAccountMenu = () => closeMenu(MENU_ACCOUNT);
 const accountMenuOpen = state => state.scratchGui.menus[MENU_ACCOUNT];
@@ -54,6 +61,7 @@ const languageMenuOpen = state => state.scratchGui.menus[MENU_LANGUAGE];
 const openLoginMenu = () => openMenu(MENU_LOGIN);
 const closeLoginMenu = () => closeMenu(MENU_LOGIN);
 const loginMenuOpen = state => state.scratchGui.menus[MENU_LOGIN];
+const showLoginMenue = () => showLogin(MENU_LOGIN);
 
 export {
     reducer as default,
@@ -72,5 +80,6 @@ export {
     languageMenuOpen,
     openLoginMenu,
     closeLoginMenu,
-    loginMenuOpen
+    loginMenuOpen,
+    showLoginMenue
 };

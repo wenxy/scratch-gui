@@ -42,11 +42,39 @@ STAGE_DISPLAY_SCALES[STAGE_DISPLAY_SIZES.large] = 1; // large mode, wide browser
 STAGE_DISPLAY_SCALES[STAGE_DISPLAY_SIZES.largeConstrained] = 0.85; // large mode but narrow browser
 STAGE_DISPLAY_SCALES[STAGE_DISPLAY_SIZES.small] = 0.5; // small mode, regardless of browser size
 
+const isMobile = (function () {
+    const browser = navigator.userAgent.toLowerCase();
+    const phone = /iphone|ipod|ipad|android|mobile|blackberry|webos|incognito|webmate|bada|nokia|lg|ucweb|skyfire|micromessenger/i;
+    if (phone.test(browser)) {
+        return true;
+    }
+    return false;
+}());
+
+const isWeixin = (function () {
+    const browser = navigator.userAgent.toLowerCase();
+    if (browser.match(/MicroMessenger/i)){
+        return true;
+    }
+    return false;
+}());
+
+const standardStageWidth = (function () {
+    if (isMobile) {
+        return window.innerWidth - 5;
+    }
+    return 480;
+}());
+const standardStageHeight = Math.round(standardStageWidth / 1.33);
+
+
 export default {
-    standardStageWidth: 480,
-    standardStageHeight: 360,
+    standardStageWidth: standardStageWidth,
+    standardStageHeight: standardStageHeight,
     fullSizeMinWidth: 1096,
-    fullSizePaintMinWidth: 1250
+    fullSizePaintMinWidth: 1250,
+    isMobile: isMobile,
+    isWeixin: isWeixin
 };
 
 export {

@@ -7,7 +7,7 @@ export default (filename, blob) => {
         navigator.msSaveOrOpenBlob(blob, filename);
         return;
     }
-
+    // console.log('download blob , filename', blob ,filename);
     const url = window.URL.createObjectURL(blob);
     downloadLink.href = url;
     downloadLink.download = filename;

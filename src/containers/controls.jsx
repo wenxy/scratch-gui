@@ -62,6 +62,9 @@ const mapStateToProps = state => ({
     turbo: state.scratchGui.vmStatus.turbo
 });
 // no-op function to prevent dispatch prop being passed to component
-const mapDispatchToProps = () => ({});
+
+const mapDispatchToProps = dispatch => ({
+   // onSeeInside: () => dispatch(setPlayer(false))
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Controls);

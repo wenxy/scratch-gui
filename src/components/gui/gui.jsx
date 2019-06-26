@@ -9,7 +9,7 @@ import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import tabStyles from 'react-tabs/style/react-tabs.css';
 import VM from 'scratch-vm';
 import Renderer from 'scratch-render';
-
+import {Dialog} from '@alifd/next';
 import Blocks from '../../containers/blocks.jsx';
 import CostumeTab from '../../containers/costume-tab.jsx';
 import TargetPane from '../../containers/target-pane.jsx';
@@ -30,15 +30,31 @@ import Alerts from '../../containers/alerts.jsx';
 import DragLayer from '../../containers/drag-layer.jsx';
 import ConnectionModal from '../../containers/connection-modal.jsx';
 import TelemetryModal from '../telemetry-modal/telemetry-modal.jsx';
-
+import LoginUI from '../user/login-ui.jsx';
+import RegUI from '../user/reg-ui.jsx';
+import {closeLoginUI, closeRegUI} from '../../reducers/login-reg';
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
+import {getStageDimensions} from '../../lib/screen-utils.js';
 
 import styles from './gui.css';
 import addExtensionIcon from './icon--extensions.svg';
 import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
+
+import {Grid, Tag, Icon, Balloon} from '@alifd/next';
+const {Row, Col} = Grid;
+
+import {login, loginAction, checkSession, reg, regAction} from '../../reducers/session';
+
+import IcePanel from '@icedesign/panel';
+
+import logo from './logo-1.png';
+
+import iconAvatar from './icon--avatar-default.svg';
+
+import iconFriend from './icon--friend.svg';
 
 const messages = defineMessages({
     addExtension: {
@@ -57,13 +73,13 @@ const GUIComponent = props => {
         accountNavOpen,
         activeTabIndex,
         alertsVisible,
+        loginVisible,
+        regVisible,
         authorId,
         authorThumbnailUrl,
         authorUsername,
         basePath,
         backdropLibraryVisible,
-        backpackHost,
-        backpackVisible,
         blocksTabVisible,
         cardsVisible,
         canCreateNew,
@@ -72,6 +88,7 @@ const GUIComponent = props => {
         canSave,
         canCreateCopy,
         canShare,
+        showBranding,
         canUseCloud,
         children,
         connectionModalVisible,
@@ -88,6 +105,11 @@ const GUIComponent = props => {
         renderLogin,
         onClickAccountNav,
         onCloseAccountNav,
+        onCloseLoginUI,
+        onCloseRegUI,
+        onLoginBtnClick,
+        onRegBtnClick,
+        onCheckSession,
         onLogOut,
         onOpenRegistration,
         onToggleLoginOpen,
@@ -115,6 +137,7 @@ const GUIComponent = props => {
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
+
     if (children) {
         return <Box {...componentProps}>{children}</Box>;
     }
@@ -136,22 +159,243 @@ const GUIComponent = props => {
         }
     }
 
+    // 登录态校验
+    onCheckSession();
+
+    console.log('isRendererSupported===>', isRendererSupported);
+
+    const stageDimensions = getStageDimensions(STAGE_SIZE_MODES.large, false);
+
     return (<MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
+        const smallTipShare = layout.isWeixin ? (
+            <div
+                style={{
+                    height: '50px',
+                    width: '100%',
+                    background: '#d91579',
+                    position: 'fixed',
+                    display: 'flex',
+                    bottom: '0px',
+                    left: '0px',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}
+            >
+                <img
+                    src={iconFriend}
+                    style={{
+                        height: '45px',
+                        width: '45px',
+                        marginLeft: '10px',
+                        marginRight: '10px'
+                    }}
+                />
+                <span
+                    style={{
+                        fontSize: '20px',
+                        color: '#fff'
+                    }}
+                >
+                    分享到朋友圈完成打卡
+                </span>
+            </div>
+        ) : null;
+
+        const avatar = isPlayerOnly ? (
+            <div
+                style={{
+                    position: 'absolute',
+                    right: '5px',
+                    top: '-20px'
+                }}
+            >
+                <img
+                    src={iconAvatar}
+                    style={{
+                        width: `45px`,
+                        height: '45px',
+                        borderRadius: '45px'
+                    }}
+                />
+            </div>
+        ) : null;
+
+        const whos = isPlayerOnly ? (
+            <Balloon
+                defaultVisible
+                visible
+                align="l"
+                closable={false}
+                trigger={avatar}
+            >
+                <span>
+                    小宝宝的第10个作品
+                </span>
+            </Balloon>
+        ) : null;
+
+        const title = isPlayerOnly ? (
+            <div
+                style={{
+                    width: `${stageDimensions.width}px`,
+                    textAlign: 'left',
+                    background: '#fff',
+                    borderTopLeftRadius: '5px',
+                    borderTopRightRadius: '5px',
+                    position: 'relative'
+                }}
+            >
+                {whos}
+                <h3
+                    style={{
+                        marginLeft: '5px'
+                    }}
+                >
+                    作品标题
+
+                </h3>
+            </div>
+        ) : null;
+
 
         return isPlayerOnly ? (
-            <StageWrapper
-                isFullScreen={isFullScreen}
-                isRendererSupported={isRendererSupported}
-                isRtl={isRtl}
-                loading={loading}
-                stageSize={STAGE_SIZE_MODES.large}
-                vm={vm}
+            <div
+                style={{
+                    width: `100%`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    background: 'linear-gradient(#5c2928, #e2a82b)'
+                }}
             >
-                {alertsVisible ? (
-                    <Alerts className={styles.alertsContainer} />
-                ) : null}
-            </StageWrapper>
+
+                {smallTipShare}
+
+                <Row
+                    align="center"
+                    style={{
+                        height: '120px',
+                        width: '100%'
+                    }}
+                >
+                    <img
+                        src={logo}
+                        style={{
+                            height: '100px',
+                            width: '100px',
+                            marginLeft: '10px'
+                        }}
+                    />
+                    <span
+                        style={{
+                            marginLeft: '10px',
+                            color: '#fff',
+                            fontSize: '24px'
+                        }}
+                    >
+                        甜甜圈编程
+                    </span>
+                </Row>
+                {title}
+                <StageWrapper
+                    isFullScreen={isFullScreen}
+                    isRendererSupported={isRendererSupported}
+                    isRtl={isRtl}
+                    loading={loading}
+                    showBranding={showBranding}
+                    stageSize={STAGE_SIZE_MODES.large}
+                    vm={vm}
+                >
+                    {alertsVisible ? (
+                        <Alerts className={styles.alertsContainer} />
+                    ) : null}
+                </StageWrapper>
+                <Row
+                    align="center"
+                    justify="center"
+                    style={{
+                        width: `${stageDimensions.width}px`,
+                        borderBottomLeftRadius: '5px',
+                        borderBottomRightRadius: '5px',
+                        background: '#e5f0ff',
+                        borderTop: '1px solid #f9f9f9',
+                        height: '56px'
+                    }}
+                >
+                    <Col
+                        span="12"
+                        style={{
+                            textAlign: 'center'
+                        }}
+                    >
+                        <Tag
+                            size="large"
+                            style={{
+                                border: '1px solid #ffffff7a',
+                                borderRadius: '30px'
+                            }}
+                        >
+                            <Icon
+                                style={{color: 'rgb(8, 167, 21)', marginRight: '5px'}}
+                                type="smile"
+                            />
+                            10000
+                        </Tag>
+                    </Col>
+                    <Col
+                        align="center"
+                        span="12"
+                        style={{
+                            textAlign: 'center'
+                        }}
+                    >
+                        <Tag
+                            size="large"
+                            style={{
+                                border: '1px solid #ffffff7a',
+                                borderRadius: '30px'
+                            }}
+                        >
+                            <Icon
+                                style={{color: '#ccc', marginRight: '5px'}}
+                                type="cry"
+                            />
+                            1000
+                        </Tag>
+                    </Col>
+                </Row>
+                <div>
+                    <IcePanel
+                        status="warning"
+                        style={{
+                            marginTop: '5px',
+                            marginBottom: '60px',
+                            width: `${stageDimensions.width}px`,
+                            border: 'none'
+                        }}
+                    >
+                        <IcePanel.Header
+                            style={{
+                                background: '#ffffff',
+                                border: 'none'
+                            }}
+                        >
+                        甜甜圈老师点评
+                        </IcePanel.Header>
+                        <IcePanel.Body
+                            style={{
+                                background: 'rgb(251, 233, 203)',
+                                border: 'none'
+                            }}
+                        >
+                            <p style={{fontSize: '15px', margin: 0, lineHeight: 1.5, color: '#333'}}>
+                            参差荇菜，左右芼之。窈窕淑女，钟鼓乐之。
+                            </p>
+                        </IcePanel.Body>
+                    </IcePanel>
+                </div>
+            </div>
         ) : (
             <Box
                 className={styles.pageWrapper}
@@ -200,6 +444,33 @@ const GUIComponent = props => {
                         vm={vm}
                         onRequestClose={onRequestCloseBackdropLibrary}
                     />
+                ) : null}
+                {loginVisible ? (
+                    <Dialog
+                        animation={{in: 'fadeInDown', out: 'fadeOutUp'}}
+                        footer={false}
+                        title={'登录'}
+                        visible={loginVisible}
+                        onClose={onCloseLoginUI}
+                    >
+                        <LoginUI
+                            onLoginBtnClick={onLoginBtnClick}
+                        />
+                    </Dialog>
+                ) : null}
+
+                {regVisible ? (
+                    <Dialog
+                        animation={{in: 'fadeInDown', out: 'fadeOutUp'}}
+                        footer={false}
+                        title={'注册'}
+                        visible={regVisible}
+                        onClose={onCloseRegUI}
+                    >
+                        <RegUI
+                            onRegBtnClick={onRegBtnClick}
+                        />
+                    </Dialog>
                 ) : null}
                 <MenuBar
                     accountNavOpen={accountNavOpen}
@@ -325,9 +596,11 @@ const GUIComponent = props => {
                                     {soundsTabVisible ? <SoundTab vm={vm} /> : null}
                                 </TabPanel>
                             </Tabs>
+                            {/*
                             {backpackVisible ? (
                                 <Backpack host={backpackHost} />
                             ) : null}
+                            */}
                         </Box>
 
                         <Box className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}>
@@ -359,8 +632,6 @@ GUIComponent.propTypes = {
     authorThumbnailUrl: PropTypes.string,
     authorUsername: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
     backdropLibraryVisible: PropTypes.bool,
-    backpackHost: PropTypes.string,
-    backpackVisible: PropTypes.bool,
     basePath: PropTypes.string,
     blocksTabVisible: PropTypes.bool,
     canCreateCopy: PropTypes.bool,
@@ -382,12 +653,16 @@ GUIComponent.propTypes = {
     isRtl: PropTypes.bool,
     isShared: PropTypes.bool,
     loading: PropTypes.bool,
+    loginVisible: PropTypes.bool,
     onActivateCostumesTab: PropTypes.func,
     onActivateSoundsTab: PropTypes.func,
     onActivateTab: PropTypes.func,
+    onCheckSession: PropTypes.func,
     onClickAccountNav: PropTypes.func,
     onClickLogo: PropTypes.func,
     onCloseAccountNav: PropTypes.func,
+    onCloseLoginUI: PropTypes.func,
+    onCloseRegUI: PropTypes.func,
     onExtensionButtonClick: PropTypes.func,
     onLogOut: PropTypes.func,
     onOpenRegistration: PropTypes.func,
@@ -402,7 +677,9 @@ GUIComponent.propTypes = {
     onTelemetryModalOptOut: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
     onUpdateProjectTitle: PropTypes.func,
+    regVisible: PropTypes.bool,
     renderLogin: PropTypes.func,
+    showBranding: PropTypes.bool,
     showComingSoon: PropTypes.bool,
     soundsTabVisible: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
@@ -412,8 +689,6 @@ GUIComponent.propTypes = {
     vm: PropTypes.instanceOf(VM).isRequired
 };
 GUIComponent.defaultProps = {
-    backpackHost: null,
-    backpackVisible: false,
     basePath: './',
     canCreateNew: false,
     canEditTitle: false,
@@ -421,6 +696,7 @@ GUIComponent.defaultProps = {
     canSave: false,
     canCreateCopy: false,
     canShare: false,
+    showBranding: false,
     canUseCloud: false,
     enableCommunity: false,
     isCreating: false,
@@ -435,7 +711,14 @@ const mapStateToProps = state => ({
     // This is the button's mode, as opposed to the actual current state
     stageSizeMode: state.scratchGui.stageSize.stageSize
 });
-
+const mapDispatchToProps = dispatch => ({
+    onCloseLoginUI: () => dispatch(closeLoginUI()),
+    onLoginBtnClick: values => dispatch(login(values, loginAction)),
+    onRegBtnClick: values => dispatch(reg(values, regAction)),
+    onCheckSession: () => dispatch(checkSession(loginAction)),
+    onCloseRegUI: () => dispatch(closeRegUI())
+});
 export default injectIntl(connect(
-    mapStateToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(GUIComponent));

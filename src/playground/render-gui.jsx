@@ -9,7 +9,7 @@ import TitledHOC from '../lib/titled-hoc.jsx';
 import log from '../lib/log.js';
 
 const onClickLogo = () => {
-    window.location = 'https://scratch.mit.edu';
+    window.open('//sweetbiancheng.com/');
 };
 
 const handleTelemetryModalCancel = () => {
@@ -43,7 +43,7 @@ export default appTarget => {
 
     // TODO a hack for testing the backpack, allow backpack host to be set by url param
     const backpackHostMatches = window.location.href.match(/[?&]backpack_host=([^&]*)&?/);
-    const backpackHost = backpackHostMatches ? backpackHostMatches[1] : null;
+    // const backpackHost = backpackHostMatches ? backpackHostMatches[1] : null;
 
     const scratchDesktopMatches = window.location.href.match(/[?&]isScratchDesktop=([^&]+)/);
     let simulateScratchDesktop;
@@ -63,7 +63,12 @@ export default appTarget => {
         window.onbeforeunload = () => true;
     }
 
+    // 判断是否需要登录
+    const showComingSoon = false;
+
+    console.log('-->simulateScratchDesktop', simulateScratchDesktop);
     ReactDOM.render(
+
         // important: this is checking whether `simulateScratchDesktop` is truthy, not just defined!
         simulateScratchDesktop ?
             <WrappedGui
@@ -75,10 +80,8 @@ export default appTarget => {
                 onTelemetryModalOptOut={handleTelemetryModalOptOut}
             /> :
             <WrappedGui
-                backpackVisible
-                showComingSoon
-                backpackHost={backpackHost}
                 canSave={false}
+                showComingSoon={showComingSoon}
                 onClickLogo={onClickLogo}
             />,
         appTarget);

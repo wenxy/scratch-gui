@@ -14,6 +14,10 @@ import {STAGE_DISPLAY_SIZES} from '../../lib/layout-constants.js';
 import {getStageDimensions} from '../../lib/screen-utils.js';
 import styles from './stage.css';
 
+import {Grid} from '@alifd/next';
+import KeyboardOverlay from '../../containers/keyboard-overlay.jsx';
+const {Row, Col} = Grid;
+
 const StageComponent = props => {
     const {
         canvas,
@@ -35,7 +39,10 @@ const StageComponent = props => {
     const stageDimensions = getStageDimensions(stageSize, isFullScreen);
 
     return (
-        <div>
+        <Row
+            align="center"
+            justify="center"
+        >
             <Box
                 className={classNames({
                     [styles.stageWrapper]: !isFullScreen,
@@ -44,9 +51,10 @@ const StageComponent = props => {
                 })}
                 style={{
                     minHeight: stageDimensions.height,
-                    minWidth: stageDimensions.width
+                    minWidth: stageDimensions.width,
+                    width: stageDimensions.width
                 }}
-                onDoubleClick={onDoubleClick}
+
             >
                 <Box
                     className={classNames(
@@ -83,9 +91,17 @@ const StageComponent = props => {
                 {isStarted ? null : (
                     <GreenFlagOverlay
                         className={styles.greenFlagOverlay}
+                        stageHeight={stageDimensions.height}
+                        stageWidth={stageDimensions.width}
                         wrapperClass={styles.greenFlagOverlayWrapper}
                     />
                 )}
+                <KeyboardOverlay
+                    className={styles.greenFlagOverlay}
+                    stageHeight={stageDimensions.height}
+                    stageWidth={stageDimensions.width}
+                    wrapperClass={styles.greenFlagOverlayWrapper}
+                />
                 {isColorPicking && colorInfo ? (
                     <Box className={styles.colorPickerWrapper}>
                         <Loupe colorInfo={colorInfo} />
@@ -131,7 +147,7 @@ const StageComponent = props => {
                     onClick={onDeactivateColorPicker}
                 />
             ) : null}
-        </div>
+        </Row>
     );
 };
 StageComponent.propTypes = {

@@ -22,10 +22,25 @@ class GreenFlagOverlay extends React.Component {
 
     render () {
         if (this.props.isStarted) return null;
-
         return (
             <Box
-                className={this.props.wrapperClass}
+                style={{
+                    position: 'absolute',
+                    top: `${this.props.stageHeight / 2}px`,
+                    left: `${this.props.stageWidth / 2}px`,
+                    width: `${this.props.stageWidth / 2}px`,
+                    height: `${this.props.stageWidth / 2}px`,
+                    marginTop: `${-1 * this.props.stageWidth / 4}px`,
+                    marginLeft: `${-1 * this.props.stageWidth / 4}px`,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    background: '#713939c7',
+                    borderRadius: `50%`,
+                    pointerEvents: 'all',
+                    cursor: 'pointer'
+                }}
                 onClick={this.handleClick}
             >
                 <div className={this.props.className}>
@@ -35,7 +50,6 @@ class GreenFlagOverlay extends React.Component {
                     />
                 </div>
             </Box>
-
         );
     }
 }
@@ -43,6 +57,8 @@ class GreenFlagOverlay extends React.Component {
 GreenFlagOverlay.propTypes = {
     className: PropTypes.string,
     isStarted: PropTypes.bool,
+    stageHeight: PropTypes.number,
+    stageWidth: PropTypes.number,
     vm: PropTypes.instanceOf(VM),
     wrapperClass: PropTypes.string
 };

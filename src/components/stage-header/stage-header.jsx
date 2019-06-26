@@ -8,16 +8,20 @@ import VM from 'scratch-vm';
 import Box from '../box/box.jsx';
 import Button from '../button/button.jsx';
 import Controls from '../../containers/controls.jsx';
-import {getStageDimensions} from '../../lib/screen-utils';
-import {STAGE_SIZE_MODES} from '../../lib/layout-constants';
+import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 
-import fullScreenIcon from './icon--fullscreen.svg';
 import largeStageIcon from './icon--large-stage.svg';
 import smallStageIcon from './icon--small-stage.svg';
 import unFullScreenIcon from './icon--unfullscreen.svg';
+import gaibianIcon from './icon-gaibian.svg';
 
 import scratchLogo from '../menu-bar/scratch-logo.svg';
 import styles from './stage-header.css';
+
+import {Grid} from '@alifd/next';
+const {Row, Col} = Grid;
+
+import {setPlayer} from '../../reducers/mode';
 
 const messages = defineMessages({
     largeStageSizeMessage: {
@@ -58,13 +62,12 @@ const StageHeaderComponent = function (props) {
         onSetStageUnFull,
         showBranding,
         stageSizeMode,
-        vm
+        vm,
+        onSeeInside
     } = props;
-
     let header = null;
 
     if (isFullScreen) {
-        const stageDimensions = getStageDimensions(null, true);
         const stageButton = showBranding ? (
             <div className={styles.embedScratchLogo}>
                 <a
@@ -97,7 +100,6 @@ const StageHeaderComponent = function (props) {
             <Box className={styles.stageHeaderWrapperOverlay}>
                 <Box
                     className={styles.stageMenuWrapper}
-                    style={{width: stageDimensions.width}}
                 >
                     <Controls vm={vm} />
                     {stageButton}
@@ -105,10 +107,29 @@ const StageHeaderComponent = function (props) {
             </Box>
         );
     } else {
-        const stageControls =
-            isPlayerOnly ? (
-                []
-            ) : (
+        const showEditCtr = isPlayerOnly && !layout.isMobile ? (
+            <div className={styles.stageSizeToggleGroup}>
+                <div>
+                    <Button
+                        className={classNames(
+                            styles.stageButton,
+                            styles.stageButtonFirst,
+                            (stageSizeMode === STAGE_SIZE_MODES.small) ? null : styles.stageButtonToggledOff
+                        )}
+                        onClick={onSeeInside}
+                    >
+                        <img
+                            alt={'改编此作品'}
+                            className={styles.stageButtonIcon}
+                            draggable={false}
+                            src={gaibianIcon}
+                        />
+                    </Button>
+                </div>
+            </div>
+        ) : null;
+        const stageControls = !isPlayerOnly && !layout.isMobile ?
+            (
                 <div className={styles.stageSizeToggleGroup}>
                     <div>
                         <Button
@@ -145,30 +166,37 @@ const StageHeaderComponent = function (props) {
                         </Button>
                     </div>
                 </div>
-            );
+            ) : null;
         header = (
-            <Box className={styles.stageHeaderWrapper}>
-                <Box className={styles.stageMenuWrapper}>
-                    <Controls vm={vm} />
-                    <div className={styles.stageSizeRow}>
-                        {stageControls}
-                        <div>
-                            <Button
-                                className={styles.stageButton}
-                                onClick={onSetStageFull}
-                            >
-                                <img
-                                    alt={props.intl.formatMessage(messages.fullStageSizeMessage)}
-                                    className={styles.stageButtonIcon}
-                                    draggable={false}
-                                    src={fullScreenIcon}
-                                    title={props.intl.formatMessage(messages.fullscreenControl)}
-                                />
-                            </Button>
-                        </div>
-                    </div>
-                </Box>
-            </Box>
+
+            <Row
+                justify="center"
+                span="24"
+                style={{
+                    margin: '5px',
+                }}
+            >
+                <Controls
+                    vm={vm}
+                />
+                {showEditCtr}
+                {stageControls}
+                {/* <div>
+                    <Button
+                        className={styles.stageButton}
+                        onClick={onSetStageFull}
+                    >
+                        <img
+                            alt={props.intl.formatMessage(messages.fullStageSizeMessage)}
+                            className={styles.stageButtonIcon}
+                            draggable={false}
+                            src={fullScreenIcon}
+                            title={props.intl.formatMessage(messages.fullscreenControl)}
+                        />
+                    </Button>
+                </div> */}
+            </Row>
+
         );
     }
 
@@ -185,6 +213,7 @@ StageHeaderComponent.propTypes = {
     isFullScreen: PropTypes.bool.isRequired,
     isPlayerOnly: PropTypes.bool.isRequired,
     onKeyPress: PropTypes.func.isRequired,
+    onSeeInside: PropTypes.func,
     onSetStageFull: PropTypes.func.isRequired,
     onSetStageLarge: PropTypes.func.isRequired,
     onSetStageSmall: PropTypes.func.isRequired,
@@ -194,10 +223,15 @@ StageHeaderComponent.propTypes = {
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
+const mapDispatchToProps = dispatch => ({
+    onSeeInside: () => dispatch(setPlayer(false))
+});
+
 StageHeaderComponent.defaultProps = {
     stageSizeMode: STAGE_SIZE_MODES.large
 };
 
 export default injectIntl(connect(
-    mapStateToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(StageHeaderComponent));

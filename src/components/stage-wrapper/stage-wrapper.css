@@ -1,8 +1,8 @@
 @import "../../css/units.css";
 @import "../../css/colors.css";
-
-.stage-wrapper * {
-    box-sizing: border-box;
+.stage-wrap{
+    margin: 0 0px;
+    background: #F9F9F9;
 }
 
 .stage-canvas-wrapper {

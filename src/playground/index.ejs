@@ -2,10 +2,11 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" cvicoontent="width=device-width, initial-scale=1">
     <meta name="google" value="notranslate">
     <link rel="shortcut icon" href="static/favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <% if (htmlWebpackPlugin.options.sentryConfig) { %>
         <!-- Sentry error logging to help with finding bugs -->
         <script src="https://cdn.ravenjs.com/3.22.1/raven.min.js" crossorigin="anonymous"></script>
@@ -16,5 +17,27 @@
     <% } %>
   </head>
   <body>
+   <script>
+     var key = 'projectId' ;
+           var reg = new RegExp('(^|&)' + key + '=([^&]*)(&|$)', 'i')
+           var r = window.location.search.substr(1).match(reg)
+           var projectId;
+           if(r&&r.length>3){
+             projectId = decodeURIComponent(r[2])
+             axios.get('http://localhost:8080/project/load?projectId='+projectId)
+               .then(function (response) {
+                   if(response && response.status ===200 && response.data.code === 1 && response.data.data)
+                   console.log('load project form remote,response->', response);
+                   window.projectId = response.data.data.projectId;
+                   window.projectTitle = response.data.data.projectTitle;
+                 // https://steam.nosdn.127.net/885318eb-ad83-44c4-afe3-d3bea0a0d2ab.sb3
+                  window.projectUrl=response.data.data.projectUrl;
+             })
+             .catch(function (error) {
+               console.log(error);
+             });
+           }
+
+   </script>
   </body>
 </html>

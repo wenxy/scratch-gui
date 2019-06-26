@@ -20,20 +20,17 @@ if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
 
 import styles from './player.css';
 
-const Player = ({isPlayerOnly, onSeeInside, projectId}) => (
-    <Box className={classNames(isPlayerOnly ? styles.stageOnly : styles.editor)}>
-        {isPlayerOnly && <button onClick={onSeeInside}>{'See inside'}</button>}
-        <GUI
-            enableCommunity
-            isPlayerOnly={isPlayerOnly}
-            projectId={projectId}
-        />
-    </Box>
+const Player = ({isPlayerOnly, projectId}) => (
+    <GUI
+        canSave={false}
+        isPlayerOnly={isPlayerOnly}
+        projectId={projectId}
+        showBranding={false}
+    />
 );
 
 Player.propTypes = {
     isPlayerOnly: PropTypes.bool,
-    onSeeInside: PropTypes.func,
     projectId: PropTypes.string
 };
 
@@ -41,13 +38,13 @@ const mapStateToProps = state => ({
     isPlayerOnly: state.scratchGui.mode.isPlayerOnly
 });
 
-const mapDispatchToProps = dispatch => ({
-    onSeeInside: () => dispatch(setPlayer(false))
-});
+/* const mapDispatchToProps = dispatch => ({
+   // onSeeInside: () => dispatch(setPlayer(false))
+}); */
 
 const ConnectedPlayer = connect(
-    mapStateToProps,
-    mapDispatchToProps
+    mapStateToProps
+    /* mapDispatchToProps */
 )(Player);
 
 // note that redux's 'compose' function is just being used as a general utility to make

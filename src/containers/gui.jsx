@@ -6,6 +6,8 @@ import ReactModal from 'react-modal';
 import VM from 'scratch-vm';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 
+import {Message} from '@alifd/next'
+
 import ErrorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import {
     getIsError,
@@ -41,6 +43,7 @@ import Loader from '../components/loader/loader.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
 
 import VideoProvider from '../lib/video/video-provider';
+// import GoogleAnalytics from '../lib/analytics.js';
 
 const messages = defineMessages({
     defaultProjectTitle: {
@@ -106,9 +109,9 @@ class GUI extends React.Component {
         }
     }
     ensureRenderer () {
-        if (this.props.vm.renderer) {
+        /* if (this.props.vm.renderer) {
             return;
-        }
+        } */
 
         // Wait to load svg-renderer and render after the data request. This
         // way the data request is made earlier.
@@ -119,6 +122,7 @@ class GUI extends React.Component {
         } = require('scratch-svg-renderer');
 
         const vm = this.props.vm;
+        this.canvas = null;
         this.canvas = document.createElement('canvas');
         this.renderer = new Renderer(this.canvas);
         vm.attachRenderer(this.renderer);
@@ -133,7 +137,34 @@ class GUI extends React.Component {
         // makes the canvas white instead of solid black–needed because it
         // is not possible to use CSS to style the canvas to have a
         // different default color
-        vm.renderer.draw();
+
+
+        // 加载作品
+        const projectUrl = window.projectUrl;
+        const projectId = window.projectId || 0;
+        const projectTitle = window.projectTitle || '编程作品示例';
+        if ((typeof projectUrl) !== 'undefined' && projectUrl !== '') {
+            fetch(projectUrl, {method: 'GET'})
+                .then(response => response.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        this.props.onUpdateProjectId(projectId);
+                        this.setReduxTitle(projectTitle);
+                        vm.loadProject(reader.result)
+                            .then(() => {
+                                vm.renderer.draw();
+                            });
+                    };
+                    reader.readAsArrayBuffer(blob);
+                })
+                .catch(err => {
+                    Message.show({
+                        type: 'error',
+                        content: `加载异常${err}`
+                    });
+                });
+        }
     }
     render () {
         if (this.props.isError) {
@@ -171,11 +202,14 @@ class GUI extends React.Component {
             if (fontsLoaded && !fetchingProject) this.ensureRenderer();
             return <Loader />;
         }
-
+        const canShare = false;
+        const showBranding = false;
         const GUIComponent = require('../components/gui/gui.jsx').default;
         return (
             <GUIComponent
+                canShare={canShare}
                 loading={fetchingProject || isLoading || loadingStateVisible}
+                showBranding={showBranding}
                 {...componentProps}
             >
                 {children}
@@ -197,6 +231,7 @@ GUI.propTypes = {
     isScratchDesktop: PropTypes.bool,
     isShowingProject: PropTypes.bool,
     loadingStateVisible: PropTypes.bool,
+    loginVisible: PropTypes.bool,
     onProjectLoaded: PropTypes.func,
     onSeeCommunity: PropTypes.func,
     onStorageInit: PropTypes.func,
@@ -222,6 +257,8 @@ const mapStateToProps = state => {
     return {
         activeTabIndex: state.scratchGui.editorTab.activeTabIndex,
         alertsVisible: state.scratchGui.alerts.visible,
+        loginVisible: state.loginReg.funcLogin,
+        regVisible: state.loginReg.funcReg,
         backdropLibraryVisible: state.scratchGui.modals.backdropLibrary,
         blocksTabVisible: state.scratchGui.editorTab.activeTabIndex === BLOCKS_TAB_INDEX,
         cardsVisible: state.scratchGui.cards.visible,

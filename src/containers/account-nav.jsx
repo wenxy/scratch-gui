@@ -10,6 +10,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 
 import AccountNavComponent from '../components/menu-bar/account-nav.jsx';
+import {loginOut, loginOutAction} from '../reducers/session';
 
 const AccountNav = function (props) {
     const {
@@ -33,19 +34,21 @@ AccountNav.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    classroomId: state.session && state.session.session && state.session.session.user ?
-        state.session.session.user.classroomId : '',
-    isEducator: state.session && state.session.permissions && state.session.permissions.educator,
-    isStudent: state.session && state.session.permissions && state.session.permissions.student,
-    profileUrl: state.session && state.session.session && state.session.session.user ?
-        `/users/${state.session.session.user.username}` : '',
-    thumbnailUrl: state.session && state.session.session && state.session.session.user ?
-        state.session.session.user.thumbnailUrl : null,
-    username: state.session && state.session.session && state.session.session.user ?
-        state.session.session.user.username : ''
+    classroomId: state.session && state.session.session && state.session.session.userInfo ?
+        state.session.session.userInfo.classroomId : '',
+    // isEducator: state.auth && state.auth.permissions && state.auth.permissions.educator,
+    // isStudent: state.auth && state.auth.permissions && state.auth.permissions.student,
+    profileUrl: state.session && state.session.session ? `/users/${state.session.userInfo.userName}` : '',
+    thumbnailUrl: state.session && state.session.userInfo.avatarUrl ? state.session.userInfo.avatarUrl : null,
+    username: state.session && state.session.userInfo.userName ? state.session.userInfo.userName : null
 });
 
-const mapDispatchToProps = () => ({});
+const mapDispatchToProps = dispatch => ({
+    onLogOut: () => {
+        // logOut
+        dispatch(loginOut(loginOutAction));
+    }
+});
 
 export default injectIntl(connect(
     mapStateToProps,

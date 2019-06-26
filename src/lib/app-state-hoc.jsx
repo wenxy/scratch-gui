@@ -5,6 +5,8 @@ import {createStore, combineReducers, compose} from 'redux';
 import ConnectedIntlProvider from './connected-intl-provider.jsx';
 
 import localesReducer, {initLocale, localesInitialState} from '../reducers/locales';
+import sessionReducer, {sessionStatusInitialState} from '../reducers/session';
+import loginRegReducer, {loginRegInitialState} from '../reducers/login-reg';
 
 import {setPlayer, setFullScreen} from '../reducers/mode.js';
 
@@ -61,19 +63,24 @@ const AppStateHOC = function (WrappedComponent, localesOnly) {
                         initializedGui = initFullScreen(initializedGui);
                     }
                     if (props.isPlayerOnly) {
+                        console.log('initPlayer caller',props.isPlayerOnly);
                         initializedGui = initPlayer(initializedGui);
                     }
                 } else if (props.showTelemetryModal) {
                     initializedGui = initTelemetryModal(initializedGui);
                 }
                 reducers = {
+                    session: sessionReducer,
                     locales: localesReducer,
                     scratchGui: guiReducer,
+                    loginReg: loginRegReducer,
                     scratchPaint: ScratchPaintReducer
                 };
                 initialState = {
+                    session: sessionStatusInitialState,
                     locales: initializedLocales,
-                    scratchGui: initializedGui
+                    scratchGui: initializedGui,
+                    loginReg: loginRegInitialState
                 };
                 enhancer = composeEnhancers(guiMiddleware);
             }

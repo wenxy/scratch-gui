@@ -10,7 +10,7 @@
     display: block;
 
     border-radius: $space;
-    border: $stage-standard-border-width solid $ui-black-transparent;
+    /* border: $stage-standard-border-width solid $ui-black-transparent;*/
     overflow: hidden;
 
     /* @todo: This is for overriding the value being set somewhere. Where is it being set? */
@@ -60,7 +60,7 @@
 .stage-overlay-content {
     outline: none;
     margin: auto;
-    border: $stage-full-screen-border-width solid rgb(126, 133, 151);
+    /*border: $stage-full-screen-border-width solid rgb(126, 133, 151);*/
     padding: 0;
     border-radius: $space;
 
@@ -155,7 +155,7 @@ to adjust for the border using a different method */
 .green-flag-overlay {
     padding: 1rem;
     border-radius: 100%;
-    background: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.55);
     border: 3px solid $ui-white;
     display: flex;
     justify-content: center;

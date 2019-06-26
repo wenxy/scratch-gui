@@ -26,10 +26,12 @@ import toolboxReducer, {toolboxInitialState} from './toolbox';
 import vmReducer, {vmInitialState} from './vm';
 import vmStatusReducer, {vmStatusInitialState} from './vm-status';
 import throttle from 'redux-throttle';
+import thunk from 'redux-thunk';
+
 
 import decks from '../lib/libraries/decks/index.jsx';
 
-const guiMiddleware = compose(applyMiddleware(throttle(300, {leading: true, trailing: true})));
+const guiMiddleware = compose(applyMiddleware(thunk,throttle(300, {leading: true, trailing: true})));
 
 const guiInitialState = {
     alerts: alertsInitialState,
