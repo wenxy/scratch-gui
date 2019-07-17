@@ -1,4 +1,4 @@
-const SET_PROJECT_TITLE = 'projectTitle/SET_PROJECT_TITLE';
+const SET_PROJECT_ID = 'projectTitle/SET_PROJECT_ID';
 
 // we are initializing to a blank string instead of an actual title,
 // because it would be hard to localize here
@@ -7,21 +7,20 @@ const initialState = '';
 const reducer = function (state, action) {
     if (typeof state === 'undefined') state = initialState;
     switch (action.type) {
-    case SET_PROJECT_TITLE:
-        return action.title;
+    case SET_PROJECT_ID:
+        return action.projectId;
     default:
         return state;
     }
 };
-const setProjectTitle = title => ({
-    type: SET_PROJECT_TITLE,
-    title: title
+
+const setProjectId = projectId => ({
+    type: SET_PROJECT_ID,
+    projectId: projectId
 });
-
-
 
 export {
     reducer as default,
-    initialState as projectTitleInitialState,
-    setProjectTitle
+    initialState as projectIdInitialState,
+    setProjectId
 };

@@ -6,7 +6,7 @@ import ReactModal from 'react-modal';
 import VM from 'scratch-vm';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 
-import {Message} from '@alifd/next'
+import {Message} from '@alifd/next';
 
 import ErrorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import {
@@ -14,6 +14,7 @@ import {
     getIsShowingProject
 } from '../reducers/project-state';
 import {setProjectTitle} from '../reducers/project-title';
+import {setProjectId} from '../reducers/project-id';
 import {
     activateTab,
     BLOCKS_TAB_INDEX,
@@ -108,6 +109,14 @@ class GUI extends React.Component {
             this.props.onUpdateReduxProjectTitle(newTitle);
         }
     }
+    setReduxProjectId (newProjectId) {
+        if (newProjectId === null || typeof newProjectId === 'undefined') {
+            this.props.onUpdateReduxProjectId('0');
+        } else {
+            this.props.onUpdateReduxProjectId(newProjectId);
+        }
+
+    }
     ensureRenderer () {
         /* if (this.props.vm.renderer) {
             return;
@@ -151,6 +160,7 @@ class GUI extends React.Component {
                     reader.onload = () => {
                         this.props.onUpdateProjectId(projectId);
                         this.setReduxTitle(projectTitle);
+                        this.setReduxProjectId(projectId);
                         vm.loadProject(reader.result)
                             .then(() => {
                                 vm.renderer.draw();
@@ -184,6 +194,7 @@ class GUI extends React.Component {
             onStorageInit,
             onUpdateProjectId,
             onUpdateReduxProjectTitle,
+            onUpdateReduxProjectId,
             projectHost,
             projectId,
             projectTitle,
@@ -237,6 +248,7 @@ GUI.propTypes = {
     onStorageInit: PropTypes.func,
     onUpdateProjectId: PropTypes.func,
     onUpdateProjectTitle: PropTypes.func,
+    onUpdateReduxProjectId: PropTypes.func,
     onUpdateReduxProjectTitle: PropTypes.func,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -293,7 +305,8 @@ const mapDispatchToProps = dispatch => ({
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
     onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal()),
-    onUpdateReduxProjectTitle: title => dispatch(setProjectTitle(title))
+    onUpdateReduxProjectTitle: title => dispatch(setProjectTitle(title)),
+    onUpdateReduxProjectId: projectId => dispatch(setProjectId(projectId))
 });
 
 const ConnectedGUI = injectIntl(connect(

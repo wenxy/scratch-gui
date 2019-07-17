@@ -189,7 +189,7 @@ module.exports = [
                 chunks: ['lib.min', 'player'],
                 template: 'src/playground/index.ejs',
                 filename: 'player.html',
-                title: 'Scratch 3.0 GUI: Player Example',
+                title: '甜甜圈编程-作品详情',
                 host: apiHost
             }),
             new CopyWebpackPlugin([{

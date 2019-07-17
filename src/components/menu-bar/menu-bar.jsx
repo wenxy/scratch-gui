@@ -450,11 +450,7 @@ class MenuBar extends React.Component {
                                             className={className}
                                             onClick={this.handleSaveToCloud(saveCloudCallback)}
                                         >
-                                            <FormattedMessage
-                                                defaultMessage="Save to your computer"
-                                                description="Menu bar item for downloading a project to your computer"
-                                                id="gui.menuBar.saveToCloud"
-                                            />
+                                            提交作业
                                         </MenuItem>
                                     )}</SB3SaveCloud>
                                 </MenuSection>
@@ -675,46 +671,7 @@ class MenuBar extends React.Component {
                                 />
                             </React.Fragment>
                         ) : null
-                    ) : (
-                        // ******** no login session is available, so don't show login stuff
-                        <React.Fragment>
-                            <div
-                                className={classNames(
-                                    styles.menuBarItem,
-                                    styles.hoverable
-                                )}
-                                key="join"
-                                onMouseUp={this.props.onOpenRegistration}
-                            >
-                                <FormattedMessage
-                                    defaultMessage="Join Scratch"
-                                    description="Link for creating a Scratch account"
-                                    id="gui.menuBar.joinScratch"
-                                />
-                            </div>
-                            <div
-                                className={classNames(
-                                    styles.menuBarItem,
-                                    styles.hoverable
-                                )}
-                                key="login"
-                                onMouseUp={this.props.onOpenLoginUI}
-                            >
-                                <FormattedMessage
-                                    defaultMessage="Sign in"
-                                    description="Link for signing in to your Scratch account"
-                                    id="gui.menuBar.signIn"
-                                />
-                                {/* <LoginDropdown
-                                    className={classNames(styles.menuBarMenu)}
-                                    isOpen={this.props.loginMenuOpen}
-                                    isRtl={this.props.isRtl}
-                                    renderLogin={this.props.renderLogin}
-                                    onClose={this.props.onRequestCloseLogin}
-                                />*/ }
-                            </div>
-                        </React.Fragment>
-                    )}
+                    ) : null}
                 </div>
             </Box>
         );

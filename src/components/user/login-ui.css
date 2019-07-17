@@ -1,0 +1,14 @@
+.form {
+    width: 300px;
+    border-radius: 10px;
+}
+.form-sumbit{
+    width: 200px;
+    margin-top: 10px;
+}
+
+.form-cancel{
+    width: 90px;
+    margin-left: 10px;
+    margin-top: 10px;
+}

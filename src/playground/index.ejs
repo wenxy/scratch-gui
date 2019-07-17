@@ -16,7 +16,7 @@
         <!-- /Sentry -->
     <% } %>
   </head>
-  <body>
+  <body style='margin:auto;'>
    <script>
      var key = 'projectId' ;
            var reg = new RegExp('(^|&)' + key + '=([^&]*)(&|$)', 'i')
@@ -24,7 +24,7 @@
            var projectId;
            if(r&&r.length>3){
              projectId = decodeURIComponent(r[2])
-             axios.get('http://localhost:8080/project/load?projectId='+projectId)
+             axios.get('http://localhost:8081/project/load?projectId='+projectId)
                .then(function (response) {
                    if(response && response.status ===200 && response.data.code === 1 && response.data.data)
                    console.log('load project form remote,response->', response);

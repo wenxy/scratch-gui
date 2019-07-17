@@ -9,7 +9,7 @@ import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import tabStyles from 'react-tabs/style/react-tabs.css';
 import VM from 'scratch-vm';
 import Renderer from 'scratch-render';
-import {Dialog} from '@alifd/next';
+
 import Blocks from '../../containers/blocks.jsx';
 import CostumeTab from '../../containers/costume-tab.jsx';
 import TargetPane from '../../containers/target-pane.jsx';
@@ -22,7 +22,6 @@ import CostumeLibrary from '../../containers/costume-library.jsx';
 import BackdropLibrary from '../../containers/backdrop-library.jsx';
 import Watermark from '../../containers/watermark.jsx';
 
-import Backpack from '../../containers/backpack.jsx';
 import WebGlModal from '../../containers/webgl-modal.jsx';
 import TipsLibrary from '../../containers/tips-library.jsx';
 import Cards from '../../containers/cards.jsx';
@@ -36,6 +35,7 @@ import {closeLoginUI, closeRegUI} from '../../reducers/login-reg';
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
 import {getStageDimensions} from '../../lib/screen-utils.js';
+import WeixinQRCode from '../user/weixin-qrcode.jsx';
 
 import styles from './gui.css';
 import addExtensionIcon from './icon--extensions.svg';
@@ -43,10 +43,12 @@ import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
 
-import {Grid, Tag, Icon, Balloon} from '@alifd/next';
+import {Grid, Tag, Icon, Balloon, Dialog, Button} from '@alifd/next';
 const {Row, Col} = Grid;
-
-import {login, loginAction, checkSession, reg, regAction} from '../../reducers/session';
+/**
+ * 什么
+ */
+import {login, loginAction, checkSession, reg, regAction, getWeixinLoginQRcode, getWeixinLoginQRcodeAction} from '../../reducers/session';
 
 import IcePanel from '@icedesign/panel';
 
@@ -96,6 +98,7 @@ const GUIComponent = props => {
         costumesTabVisible,
         enableCommunity,
         intl,
+        needLogin,
         isCreating,
         isFullScreen,
         isPlayerOnly,
@@ -142,6 +145,7 @@ const GUIComponent = props => {
         return <Box {...componentProps}>{children}</Box>;
     }
 
+
     const tabClassNames = {
         tabs: styles.tabs,
         tab: classNames(tabStyles.reactTabsTab, styles.tab),
@@ -162,7 +166,10 @@ const GUIComponent = props => {
     // 登录态校验
     onCheckSession();
 
-    console.log('isRendererSupported===>', isRendererSupported);
+    if (needLogin){
+       // onGetWeixinQRCode();
+    }
+    console.log('needLogin===>', needLogin);
 
     const stageDimensions = getStageDimensions(STAGE_SIZE_MODES.large, false);
 
@@ -201,7 +208,6 @@ const GUIComponent = props => {
                 </span>
             </div>
         ) : null;
-
         const avatar = isPlayerOnly ? (
             <div
                 style={{
@@ -472,6 +478,12 @@ const GUIComponent = props => {
                         />
                     </Dialog>
                 ) : null}
+                {needLogin ? (
+                    <WeixinQRCode
+                        needLogin={needLogin}
+                        onCheckSession={onCheckSession} />
+                ) : null}
+
                 <MenuBar
                     accountNavOpen={accountNavOpen}
                     authorId={authorId}
@@ -628,10 +640,10 @@ const GUIComponent = props => {
 GUIComponent.propTypes = {
     accountNavOpen: PropTypes.bool,
     activeTabIndex: PropTypes.number,
-    authorId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
-    authorThumbnailUrl: PropTypes.string,
-    authorUsername: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
-    backdropLibraryVisible: PropTypes.bool,
+    authorId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+    authorThumbnailUrl: PropTypes.string, // can be false
+    authorUsername: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+    backdropLibraryVisible: PropTypes.bool, // can be false
     basePath: PropTypes.string,
     blocksTabVisible: PropTypes.bool,
     canCreateCopy: PropTypes.bool,
@@ -654,6 +666,7 @@ GUIComponent.propTypes = {
     isShared: PropTypes.bool,
     loading: PropTypes.bool,
     loginVisible: PropTypes.bool,
+    needLogin: PropTypes.bool,
     onActivateCostumesTab: PropTypes.func,
     onActivateSoundsTab: PropTypes.func,
     onActivateTab: PropTypes.func,
@@ -664,6 +677,7 @@ GUIComponent.propTypes = {
     onCloseLoginUI: PropTypes.func,
     onCloseRegUI: PropTypes.func,
     onExtensionButtonClick: PropTypes.func,
+    onGetWeixinQRCode: PropTypes.func,
     onLogOut: PropTypes.func,
     onOpenRegistration: PropTypes.func,
     onRequestCloseBackdropLibrary: PropTypes.func,
@@ -704,12 +718,13 @@ GUIComponent.defaultProps = {
     loading: false,
     onUpdateProjectTitle: () => {},
     showComingSoon: false,
-    stageSizeMode: STAGE_SIZE_MODES.large
+    stageSizeMode: STAGE_SIZE_MODES.large,
 };
 
 const mapStateToProps = state => ({
     // This is the button's mode, as opposed to the actual current state
-    stageSizeMode: state.scratchGui.stageSize.stageSize
+    stageSizeMode: state.scratchGui.stageSize.stageSize,
+    needLogin: state.session.needLogin,
 });
 const mapDispatchToProps = dispatch => ({
     onCloseLoginUI: () => dispatch(closeLoginUI()),
