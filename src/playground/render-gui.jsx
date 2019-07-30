@@ -66,7 +66,6 @@ export default appTarget => {
     // 判断是否需要登录
     const showComingSoon = false;
 
-    console.log('-->simulateScratchDesktop', simulateScratchDesktop);
     ReactDOM.render(
 
         // important: this is checking whether `simulateScratchDesktop` is truthy, not just defined!
@@ -79,6 +78,7 @@ export default appTarget => {
                 onTelemetryModalOptIn={handleTelemetryModalOptIn}
                 onTelemetryModalOptOut={handleTelemetryModalOptOut}
             /> :
+            // 设置以player方式打开
             <WrappedGui
                 canSave={false}
                 showComingSoon={showComingSoon}

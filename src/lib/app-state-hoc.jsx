@@ -7,8 +7,12 @@ import ConnectedIntlProvider from './connected-intl-provider.jsx';
 import localesReducer, {initLocale, localesInitialState} from '../reducers/locales';
 import sessionReducer, {sessionStatusInitialState} from '../reducers/session';
 import loginRegReducer, {loginRegInitialState} from '../reducers/login-reg';
+import projectInfoReducer,{projectInfoInitialState} from '../reducers/projectInfo';
 
 import {setPlayer, setFullScreen} from '../reducers/mode.js';
+
+import {updateProjectAction, getProjectInfo} from '../reducers/projectInfo';
+
 
 import locales from 'scratch-l10n';
 import {detectLocale} from './detect-locale';
@@ -63,7 +67,6 @@ const AppStateHOC = function (WrappedComponent, localesOnly) {
                         initializedGui = initFullScreen(initializedGui);
                     }
                     if (props.isPlayerOnly) {
-                        console.log('initPlayer caller',props.isPlayerOnly);
                         initializedGui = initPlayer(initializedGui);
                     }
                 } else if (props.showTelemetryModal) {
@@ -74,13 +77,15 @@ const AppStateHOC = function (WrappedComponent, localesOnly) {
                     locales: localesReducer,
                     scratchGui: guiReducer,
                     loginReg: loginRegReducer,
-                    scratchPaint: ScratchPaintReducer
+                    scratchPaint: ScratchPaintReducer,
+                    projectInfo: projectInfoReducer
                 };
                 initialState = {
                     session: sessionStatusInitialState,
                     locales: initializedLocales,
                     scratchGui: initializedGui,
-                    loginReg: loginRegInitialState
+                    loginReg: loginRegInitialState,
+                    projectInfo: projectInfoInitialState
                 };
                 enhancer = composeEnhancers(guiMiddleware);
             }
@@ -92,6 +97,8 @@ const AppStateHOC = function (WrappedComponent, localesOnly) {
             );
         }
         componentDidUpdate (prevProps) {
+            console.log('====><<<<<>>>>', window.projectId)
+
             if (localesOnly) return;
             if (prevProps.isPlayerOnly !== this.props.isPlayerOnly) {
                 this.store.dispatch(setPlayer(this.props.isPlayerOnly));
@@ -99,6 +106,8 @@ const AppStateHOC = function (WrappedComponent, localesOnly) {
             if (prevProps.isFullScreen !== this.props.isFullScreen) {
                 this.store.dispatch(setFullScreen(this.props.isFullScreen));
             }
+            // console.log('====><<<<<>>>>', window.projectId)
+            // this.store.dispatch(getProjectInfo(window.projectId,updateProjectAction));
         }
         render () {
             const {

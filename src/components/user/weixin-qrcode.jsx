@@ -2,7 +2,7 @@ import React from 'react';
 import {Button, Dialog, Message} from '@alifd/next';
 import PropTypes from 'prop-types';
 import log from '../../lib/log';
-import {getWeixinLoginQRcodeService, checkWxLoginService} from '../../lib/http/service';
+import {getWeixinLoginQRcodeService, checkWxLoginService, checkSessionService} from '../../lib/http/service';
 import bindAll from 'lodash.bindall';
 
 const imgStyle = {
@@ -20,58 +20,75 @@ class WeixinQRCode extends React.Component {
         super(props);
         this.state = {
             qrcodeUrl: '',
-            visible: true
+            visible: false
         };
         bindAll(this, [
-            'okClick'
+            'handleOkClick',
+            'checkLoginState'
         ]);
     }
 
+    componentWillMount () {
 
+    }
     componentDidMount () {
-        getWeixinLoginQRcodeService().then(data => {
-            log.info('get weixin qrcode ', data);
-            this.setState({
-                qrcodeUrl: data.qcodeUrl,
-                uuid: data.uuid
-            });
-        })
-            .catch(err => {
-                Message.show({
-                    title: `登录失败${err}`,
-                    type: 'notice',
-                    hasMask: true,
-                    duration: 3
-                });
-            });
-
-
-        this.timerID = setInterval(() => {
-            checkWxLoginService(this.state.uuid).then(data => {
-                log.info('check wx login', data);
-                if (data){
-                    this.props.onCheckSession();
-                    this.setState({visible: false});
-                    clearInterval(this.timerID);
-                }
-            })
-                .catch(err => {
-                    log.error(err);
-                });
-        }, 10000);
+        this.checkLoginState();
     }
     componentWillUnmount () {
         clearInterval(this.timerID);
     }
 
-    okClick () {
-        log.debug('i am okClick btn.');
-        this.setState({visible: false});
+    checkLoginState () {
+        checkSessionService().then(sessionData => {
+            if (!sessionData || !sessionData.session){
+                getWeixinLoginQRcodeService().then(data => {
+                    log.info('get weixin qrcode ', data);
+                    this.setState({
+                        qrcodeUrl: data.qcodeUrl,
+                        uuid: data.uuid,
+                        visible: true
+                    });
+                })
+                    .catch(err => {
+                        Message.show({
+                            title: `登录失败${err}`,
+                            type: 'notice',
+                            hasMask: true,
+                            duration: 3000
+                        });
+                    });
 
-        clearInterval(this.timerID);
+
+                this.timerID = setInterval(() => {
+                    log.info(this.state.visible, this.props.needLogin, !!this.state.qrcodeUrl);
+                    checkWxLoginService(this.state.uuid).then(data => {
+                        log.info('check wx login', data);
+                        if (data){
+                            this.props.onCheckSession();
+                            this.setState({visible: false});
+                            clearInterval(this.timerID);
+                        }
+                    })
+                        .catch(err => {
+                            log.error(err);
+                        });
+                }, 5000);
+            }
+        })
+            .catch(err => {
+                log.error(err);
+            });
+
+    }
+
+    handleOkClick () {
+        log.debug('i am okClick btn.');
+        // this.setState({visible: false});
+
+        // clearInterval(this.timerID);
     }
     render () {
-        const visible = this.state.visible && this.props.needLogin && !!this.state.qrcodeUrl;
+        const visible = this.state.visible && !!this.state.qrcodeUrl;
         return (
             <Dialog
                 closeable={false}
@@ -79,7 +96,7 @@ class WeixinQRCode extends React.Component {
                     <Button
                         warning
                         type="primary"
-                        onClick={this.okClick}
+                        onClick={this.handleOkClick}
                     >
                         我已经完成微信授权
                     </Button>}
@@ -99,7 +116,6 @@ class WeixinQRCode extends React.Component {
 
 
 WeixinQRCode.propTypes = {
-    needLogin: PropTypes.bool,
     onCheckSession: PropTypes.func
 };
 export default WeixinQRCode;

@@ -1,7 +1,9 @@
 import cookies from 'js-cookie';
 import {Message} from '@alifd/next';
 
-import {loginByAccountService, checkSessionService, loginOutService, regByAccountService, getWeixinLoginQRcodeService} from '../lib/http/service';
+import {loginByAccountService, checkSessionService, loginOutService} from '../lib/http/service';
+import {regByAccountService, getWeixinLoginQRcodeService} from '../lib/http/service';
+
 import log from '../lib/log';
 
 import {FUNC_LOGIN, FUNC_REG} from './login-reg';

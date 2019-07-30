@@ -4,7 +4,7 @@ import {compose} from 'redux';
 import {connect} from 'react-redux';
 import ReactModal from 'react-modal';
 import VM from 'scratch-vm';
-import {defineMessages, injectIntl, intlShape} from 'react-intl';
+import {injectIntl, intlShape} from 'react-intl';
 
 import {Message} from '@alifd/next';
 
@@ -14,7 +14,6 @@ import {
     getIsShowingProject
 } from '../reducers/project-state';
 import {setProjectTitle} from '../reducers/project-title';
-import {setProjectId} from '../reducers/project-id';
 import {
     activateTab,
     BLOCKS_TAB_INDEX,
@@ -22,12 +21,18 @@ import {
     SOUNDS_TAB_INDEX
 } from '../reducers/editor-tab';
 
+
 import {
     closeCostumeLibrary,
     closeBackdropLibrary,
     closeTelemetryModal,
     openExtensionLibrary
 } from '../reducers/modals';
+
+import {
+    updateProjectAction,
+    getProjectInfo
+} from '../reducers/projectInfo';
 
 import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
 import LocalizationHOC from '../lib/localization-hoc.jsx';
@@ -46,13 +51,6 @@ import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
 import VideoProvider from '../lib/video/video-provider';
 // import GoogleAnalytics from '../lib/analytics.js';
 
-const messages = defineMessages({
-    defaultProjectTitle: {
-        id: 'gui.gui.defaultProjectTitle',
-        description: 'Default title for project',
-        defaultMessage: 'Scratch Project'
-    }
-});
 
 class GUI extends React.Component {
     componentDidMount () {
@@ -60,6 +58,7 @@ class GUI extends React.Component {
         this.setReduxTitle(this.props.projectTitle);
         this.props.onStorageInit(storage);
 
+        this.getProjectInfo();
         // Use setTimeout. Do not use requestAnimationFrame or a resolved
         // Promise. We want this work delayed until after the data request is
         // made.
@@ -103,7 +102,7 @@ class GUI extends React.Component {
     setReduxTitle (newTitle) {
         if (newTitle === null || typeof newTitle === 'undefined') {
             this.props.onUpdateReduxProjectTitle(
-                this.props.intl.formatMessage(messages.defaultProjectTitle)
+                '我的甜甜圈作品'
             );
         } else {
             this.props.onUpdateReduxProjectTitle(newTitle);
@@ -149,24 +148,49 @@ class GUI extends React.Component {
 
 
         // 加载作品
+        const isFetch = window.isFetch || false;
         const projectUrl = window.projectUrl;
         const projectId = window.projectId || 0;
         const projectTitle = window.projectTitle || '编程作品示例';
-        if ((typeof projectUrl) !== 'undefined' && projectUrl !== '') {
-            fetch(projectUrl, {method: 'GET'})
+        if ((typeof projectUrl) !== 'undefined' && projectUrl !== '' && !isFetch) {
+            console.log('fetch project url is', projectUrl);
+            const myHeaders = new Headers();
+            myHeaders.append('Origin', 'sweetbiancheng.com');
+
+            Message.show({
+                type: 'loading',
+                title: '加载作品',
+                content: '请稍后，正在加载作品...',
+                hasMask: true,
+                shape: 'toast',
+                duration: 0
+            });
+            window.isFetch = true;
+            fetch(projectUrl, {headers: myHeaders})
                 .then(response => response.blob())
                 .then(blob => {
+                    console.log('=====>load from cloud, size = ', blob.size, ',type = ', blob.type);
                     const reader = new FileReader();
                     reader.onload = () => {
                         this.props.onUpdateProjectId(projectId);
                         this.setReduxTitle(projectTitle);
-                        this.setReduxProjectId(projectId);
+                        vm.clear();
                         vm.loadProject(reader.result)
                             .then(() => {
                                 vm.renderer.draw();
+                                Message.hide();
+                                window.isFetch = false;
+                            })
+                            .catch(err => {
+                                console.log(`vm load project error -> ${err}`);
+                                Message.show({
+                                    type: 'error',
+                                    content: `作品文件损坏！`
+                                });
                             });
                     };
                     reader.readAsArrayBuffer(blob);
+
                 })
                 .catch(err => {
                     Message.show({
@@ -175,6 +199,14 @@ class GUI extends React.Component {
                     });
                 });
         }
+    }
+    getProjectInfo () {
+        // console.log('====>>>><<<>>><><>++~~~~~~`');
+        if (window.projectId && window.projectId > 0) {
+            this.props.updateProjectInfo(window.projectId || 0);
+        }
+        // this.props.updateProjectInfo(window.projectId || 1);
+
     }
     render () {
         if (this.props.isError) {
@@ -195,6 +227,7 @@ class GUI extends React.Component {
             onUpdateProjectId,
             onUpdateReduxProjectTitle,
             onUpdateReduxProjectId,
+            updateProjectInfo,
             projectHost,
             projectId,
             projectTitle,
@@ -254,6 +287,7 @@ GUI.propTypes = {
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     projectTitle: PropTypes.string,
     telemetryModalVisible: PropTypes.bool,
+    updateProjectInfo: PropTypes.func,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
@@ -306,7 +340,7 @@ const mapDispatchToProps = dispatch => ({
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
     onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal()),
     onUpdateReduxProjectTitle: title => dispatch(setProjectTitle(title)),
-    onUpdateReduxProjectId: projectId => dispatch(setProjectId(projectId))
+    updateProjectInfo: projectId => dispatch(getProjectInfo(projectId, updateProjectAction))
 });
 
 const ConnectedGUI = injectIntl(connect(

@@ -35,7 +35,6 @@ import {closeLoginUI, closeRegUI} from '../../reducers/login-reg';
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
 import {getStageDimensions} from '../../lib/screen-utils.js';
-import WeixinQRCode from '../user/weixin-qrcode.jsx';
 
 import styles from './gui.css';
 import addExtensionIcon from './icon--extensions.svg';
@@ -43,12 +42,12 @@ import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
 
-import {Grid, Tag, Icon, Balloon, Dialog, Button} from '@alifd/next';
+import {Grid, Tag, Icon, Dialog} from '@alifd/next';
 const {Row, Col} = Grid;
 /**
  * 什么
  */
-import {login, loginAction, checkSession, reg, regAction, getWeixinLoginQRcode, getWeixinLoginQRcodeAction} from '../../reducers/session';
+import {login, loginAction, checkSession, reg, regAction} from '../../reducers/session';
 
 import IcePanel from '@icedesign/panel';
 
@@ -56,7 +55,7 @@ import logo from './logo-1.png';
 
 import iconAvatar from './icon--avatar-default.svg';
 
-import iconFriend from './icon--friend.svg';
+import {smile, cry, cryAction, smileAction} from '../../reducers/projectInfo';
 
 const messages = defineMessages({
     addExtension: {
@@ -137,6 +136,9 @@ const GUIComponent = props => {
         targetIsStage,
         telemetryModalVisible,
         tipsLibraryVisible,
+        projectInfo,
+        onSmile,
+        onCry,
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
@@ -164,18 +166,22 @@ const GUIComponent = props => {
     }
 
     // 登录态校验
-    onCheckSession();
+    // if (!isPlayerOnly && needLogin){
+    //    onCheckSession();
+    // }
+    //
+    //
 
     if (needLogin){
-       // onGetWeixinQRCode();
+        // onGetWeixinQRCode();
     }
-    console.log('needLogin===>', needLogin);
 
     const stageDimensions = getStageDimensions(STAGE_SIZE_MODES.large, false);
 
     return (<MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
-        const smallTipShare = layout.isWeixin ? (
+
+        { /* const smallTipShare = layout.isWeixin ? (
             <div
                 style={{
                     height: '50px',
@@ -207,7 +213,7 @@ const GUIComponent = props => {
                     分享到朋友圈完成打卡
                 </span>
             </div>
-        ) : null;
+        ) : null; */ }
         const avatar = isPlayerOnly ? (
             <div
                 style={{
@@ -217,7 +223,7 @@ const GUIComponent = props => {
                 }}
             >
                 <img
-                    src={iconAvatar}
+                    src={projectInfo.authAvatarUrl || iconAvatar}
                     style={{
                         width: `45px`,
                         height: '45px',
@@ -228,17 +234,22 @@ const GUIComponent = props => {
         ) : null;
 
         const whos = isPlayerOnly ? (
-            <Balloon
-                defaultVisible
-                visible
-                align="l"
-                closable={false}
-                trigger={avatar}
+            <div
+                style={{
+                    position: 'absolute',
+                    right: '50px',
+                    top: '-36px',
+                    color: '#fff'
+                }}
             >
-                <span>
-                    小宝宝的第10个作品
+                <span
+                    style={{
+                        fontSize: '20px'
+                    }}
+                >
+                    {projectInfo.projectDesc || ''}
                 </span>
-            </Balloon>
+            </div>
         ) : null;
 
         const title = isPlayerOnly ? (
@@ -253,12 +264,13 @@ const GUIComponent = props => {
                 }}
             >
                 {whos}
+                {avatar}
                 <h3
                     style={{
                         marginLeft: '5px'
                     }}
                 >
-                    作品标题
+                    {projectInfo.projectTitle || ''}
 
                 </h3>
             </div>
@@ -276,13 +288,12 @@ const GUIComponent = props => {
                 }}
             >
 
-                {smallTipShare}
-
                 <Row
                     align="center"
                     style={{
                         height: '120px',
-                        width: '100%'
+                        width: '100%',
+                        marginBottom: '10px'
                     }}
                 >
                     <img
@@ -341,12 +352,13 @@ const GUIComponent = props => {
                                 border: '1px solid #ffffff7a',
                                 borderRadius: '30px'
                             }}
+                            onClick={() => onSmile(projectInfo.projectId)}
                         >
                             <Icon
                                 style={{color: 'rgb(8, 167, 21)', marginRight: '5px'}}
                                 type="smile"
                             />
-                            10000
+                            {projectInfo.smile}
                         </Tag>
                     </Col>
                     <Col
@@ -362,12 +374,13 @@ const GUIComponent = props => {
                                 border: '1px solid #ffffff7a',
                                 borderRadius: '30px'
                             }}
+                            onClick={() => onCry(projectInfo.projectId)}
                         >
                             <Icon
                                 style={{color: '#ccc', marginRight: '5px'}}
                                 type="cry"
                             />
-                            1000
+                            {projectInfo.cry}
                         </Tag>
                     </Col>
                 </Row>
@@ -396,7 +409,7 @@ const GUIComponent = props => {
                             }}
                         >
                             <p style={{fontSize: '15px', margin: 0, lineHeight: 1.5, color: '#333'}}>
-                            参差荇菜，左右芼之。窈窕淑女，钟鼓乐之。
+                                {projectInfo.teacherComment}
                             </p>
                         </IcePanel.Body>
                     </IcePanel>
@@ -478,12 +491,6 @@ const GUIComponent = props => {
                         />
                     </Dialog>
                 ) : null}
-                {needLogin ? (
-                    <WeixinQRCode
-                        needLogin={needLogin}
-                        onCheckSession={onCheckSession} />
-                ) : null}
-
                 <MenuBar
                     accountNavOpen={accountNavOpen}
                     authorId={authorId}
@@ -676,8 +683,8 @@ GUIComponent.propTypes = {
     onCloseAccountNav: PropTypes.func,
     onCloseLoginUI: PropTypes.func,
     onCloseRegUI: PropTypes.func,
+    onCry: PropTypes.func,
     onExtensionButtonClick: PropTypes.func,
-    onGetWeixinQRCode: PropTypes.func,
     onLogOut: PropTypes.func,
     onOpenRegistration: PropTypes.func,
     onRequestCloseBackdropLibrary: PropTypes.func,
@@ -685,6 +692,7 @@ GUIComponent.propTypes = {
     onRequestCloseTelemetryModal: PropTypes.func,
     onSeeCommunity: PropTypes.func,
     onShare: PropTypes.func,
+    onSmile: PropTypes.func,
     onTabSelect: PropTypes.func,
     onTelemetryModalCancel: PropTypes.func,
     onTelemetryModalOptIn: PropTypes.func,
@@ -718,20 +726,23 @@ GUIComponent.defaultProps = {
     loading: false,
     onUpdateProjectTitle: () => {},
     showComingSoon: false,
-    stageSizeMode: STAGE_SIZE_MODES.large,
+    stageSizeMode: STAGE_SIZE_MODES.large
 };
 
 const mapStateToProps = state => ({
     // This is the button's mode, as opposed to the actual current state
     stageSizeMode: state.scratchGui.stageSize.stageSize,
     needLogin: state.session.needLogin,
+    projectInfo: state.projectInfo
 });
 const mapDispatchToProps = dispatch => ({
     onCloseLoginUI: () => dispatch(closeLoginUI()),
     onLoginBtnClick: values => dispatch(login(values, loginAction)),
     onRegBtnClick: values => dispatch(reg(values, regAction)),
     onCheckSession: () => dispatch(checkSession(loginAction)),
-    onCloseRegUI: () => dispatch(closeRegUI())
+    onCloseRegUI: () => dispatch(closeRegUI()),
+    onSmile: projectId => dispatch(smile(projectId, smileAction)),
+    onCry: projectId => dispatch(cry(projectId, cryAction))
 });
 export default injectIntl(connect(
     mapStateToProps,

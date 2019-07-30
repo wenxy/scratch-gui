@@ -15,7 +15,6 @@ import {getStageDimensions} from '../../lib/screen-utils.js';
 import styles from './stage.css';
 
 import {Grid} from '@alifd/next';
-import KeyboardOverlay from '../../containers/keyboard-overlay.jsx';
 const {Row, Col} = Grid;
 
 const StageComponent = props => {
@@ -88,20 +87,15 @@ const StageComponent = props => {
                         stageWidth={stageDimensions.width}
                     />
                 </Box>
-                {isStarted ? null : (
+                {/* {isStarted ? null : (
                     <GreenFlagOverlay
                         className={styles.greenFlagOverlay}
                         stageHeight={stageDimensions.height}
                         stageWidth={stageDimensions.width}
                         wrapperClass={styles.greenFlagOverlayWrapper}
                     />
-                )}
-                <KeyboardOverlay
-                    className={styles.greenFlagOverlay}
-                    stageHeight={stageDimensions.height}
-                    stageWidth={stageDimensions.width}
-                    wrapperClass={styles.greenFlagOverlayWrapper}
-                />
+                )}*/}
+
                 {isColorPicking && colorInfo ? (
                     <Box className={styles.colorPickerWrapper}>
                         <Loupe colorInfo={colorInfo} />

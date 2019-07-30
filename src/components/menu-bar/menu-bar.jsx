@@ -75,6 +75,8 @@ import sweetBianChengLogo from './sweet-biancheng-logo.png';
 
 
 import sharedMessages from '../../lib/shared-messages';
+import WeixinQRCode from '../user/weixin-qrcode.jsx';
+import {checkSession, loginAction} from '../../reducers/session';
 
 const ariaMessages = defineMessages({
     language: {
@@ -161,6 +163,7 @@ class MenuBar extends React.Component {
         ]);
     }
     componentDidMount () {
+        this.props.onCheckSession();
         document.addEventListener('keydown', this.handleKeyPress);
     }
     componentWillUnmount () {
@@ -332,7 +335,10 @@ class MenuBar extends React.Component {
             >
                 <div className={styles.mainMenu}>
                     <div className={styles.fileGroup}>
-                        <div className={classNames(styles.menuBarItem)}  onClick={this.props.onClickLogo}>
+                        <div
+                            className={classNames(styles.menuBarItem)}
+                            onClick={this.props.onClickLogo}
+                        >
                             <img
                                 alt="Scratch"
                                 className={classNames(styles.scratchLogo, {
@@ -619,8 +625,8 @@ class MenuBar extends React.Component {
                     <SB3SaveCloud>{(className, saveCloudCallback) => (
                         <ButtonIce
                             warning
-                            type='primary'
                             className={className}
+                            type="primary"
                             onClick={this.handleSaveToCloud(saveCloudCallback)}
                         >
                             {'提交作业'}
@@ -673,6 +679,11 @@ class MenuBar extends React.Component {
                         ) : null
                     ) : null}
                 </div>
+
+                <WeixinQRCode
+                    onCheckSession={this.props.onCheckSession}
+                />
+
             </Box>
         );
     }
@@ -704,6 +715,8 @@ MenuBar.propTypes = {
     languageMenuOpen: PropTypes.bool,
     locale: PropTypes.string.isRequired,
     loginMenuOpen: PropTypes.bool,
+    needLogin: PropTypes.bool,
+    onCheckSession: PropTypes.func,
     onClickAccount: PropTypes.func,
     onClickEdit: PropTypes.func,
     onClickFile: PropTypes.func,
@@ -758,6 +771,7 @@ const mapStateToProps = (state, ownProps) => {
         locale: state.locales.locale,
         loginMenuOpen: loginMenuOpen(state),
         projectTitle: state.scratchGui.projectTitle,
+        needLogin: state.session.needLogin,
         sessionExists: session.session && typeof session.session !== 'undefined',
         username: session.userInfo.userName ? session.userInfo.userName : null,
         userOwnsProject: ownProps.authorUsername && session.userInfo.userName &&
@@ -785,7 +799,8 @@ const mapDispatchToProps = dispatch => ({
     onClickSaveAsCopy: () => dispatch(saveProjectAsCopy()),
     onSeeCommunity: () => dispatch(setPlayer(true)),
     onOpenLoginUI: () => dispatch(openLoginUI()),
-    onOpenRegistration: () => dispatch(openRegUI())
+    onOpenRegistration: () => dispatch(openRegUI()),
+    onCheckSession: () => dispatch(checkSession(loginAction))
 });
 
 export default compose(

@@ -19,7 +19,7 @@ import scratchLogo from '../menu-bar/scratch-logo.svg';
 import styles from './stage-header.css';
 
 import {Grid} from '@alifd/next';
-const {Row, Col} = Grid;
+const {Row} = Grid;
 
 import {setPlayer} from '../../reducers/mode';
 
@@ -51,6 +51,12 @@ const messages = defineMessages({
     }
 });
 
+const handleInside = () => {
+    const projectId = window.projectId;
+    const url = `http://sweetbiancheng.com/scratch/index.html?projectId=${projectId}`;
+    window.location.href = url;
+};
+
 const StageHeaderComponent = function (props) {
     const {
         isFullScreen,
@@ -58,12 +64,10 @@ const StageHeaderComponent = function (props) {
         onKeyPress,
         onSetStageLarge,
         onSetStageSmall,
-        onSetStageFull,
         onSetStageUnFull,
         showBranding,
         stageSizeMode,
-        vm,
-        onSeeInside
+        vm
     } = props;
     let header = null;
 
@@ -116,7 +120,7 @@ const StageHeaderComponent = function (props) {
                             styles.stageButtonFirst,
                             (stageSizeMode === STAGE_SIZE_MODES.small) ? null : styles.stageButtonToggledOff
                         )}
-                        onClick={onSeeInside}
+                        onClick={handleInside}
                     >
                         <img
                             alt={'改编此作品'}
@@ -173,7 +177,7 @@ const StageHeaderComponent = function (props) {
                 justify="center"
                 span="24"
                 style={{
-                    margin: '5px',
+                    margin: '5px'
                 }}
             >
                 <Controls

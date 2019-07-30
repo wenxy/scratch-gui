@@ -104,20 +104,20 @@ class KeyboardOverlay extends React.Component {
         if (!this.props.isStarted) return null;
         if (!layout.isMobile) return null;
         return (
-            <div>
+            <div
+                id={'keyboard-control-id'}
+                style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    alignItems: 'center',
+                    alignContent: 'center'
+                }}
+            >
                 <div
                     style={{
-                        position: 'absolute',
-                        top: `${this.props.stageHeight - 150}px`,
-                        left: `0px`,
-                        width: `150px`,
-                        height: `150px`,
-                        overflow: 'hidden',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        background: '#e5f0ff4a',
-                        borderRadius: '2rem'
+                        margin: '10px'
                     }}
                 >
                     <div>
@@ -131,22 +131,21 @@ class KeyboardOverlay extends React.Component {
 
                                 }}
                             >
-                                <a
+
+                                <img
                                     ref={upKey => {
                                         this.upKey = upKey;
                                     }}
+                                    src={iconUp}
+                                    style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        cursor: 'pointer',
+                                        opacity: '1'
+                                    }}
                                     onClick={this.handleUp}
-                                >
-                                    <img
-                                        src={iconUp}
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            cursor: 'pointer',
-                                            opacity: '0.5'
-                                        }}
-                                    />
-                                </a>
+                                />
+
                             </Col>
                             <Col
                                 span="8"
@@ -156,22 +155,20 @@ class KeyboardOverlay extends React.Component {
                             <Col
                                 span="8"
                             >
-                                <a
+                                <img
                                     ref={leftKey => {
                                         this.leftKey = leftKey;
                                     }}
+                                    src={iconLeft}
+                                    style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        cursor: 'pointer',
+                                        opacity: '1',
+                                        marginRight: '40px'
+                                    }}
                                     onClick={this.handleLeft}
-                                >
-                                    <img
-                                        src={iconLeft}
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            cursor: 'pointer',
-                                            opacity: '0.5'
-                                        }}
-                                    />
-                                </a>
+                                />
                             </Col>
                             <Col
                                 span="8"
@@ -182,22 +179,19 @@ class KeyboardOverlay extends React.Component {
                             <Col
                                 span="8"
                             >
-                                <a
+                                <img
                                     ref={rightKey => {
                                         this.rightKey = rightKey;
                                     }}
+                                    src={iconRight}
+                                    style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        cursor: 'pointer',
+                                        opacity: '1'
+                                    }}
                                     onClick={this.handleRight}
-                                >
-                                    <img
-                                        src={iconRight}
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            cursor: 'pointer',
-                                            opacity: '0.5'
-                                        }}
-                                    />
-                                </a>
+                                />
                             </Col>
                         </Row>
                         <Row>
@@ -210,22 +204,20 @@ class KeyboardOverlay extends React.Component {
 
                                 }}
                             >
-                                <a
+                                <img
                                     ref={downKey => {
                                         this.downKey = downKey;
                                     }}
+                                    src={iconDown}
+                                    style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        cursor: 'pointer',
+                                        opacity: '1'
+                                    }}
                                     onClick={this.handleDown}
-                                >
-                                    <img
-                                        src={iconDown}
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            cursor: 'pointer',
-                                            opacity: '0.5'
-                                        }}
-                                    />
-                                </a>
+                                />
+
                             </Col>
                             <Col
                                 span="8"
@@ -235,35 +227,23 @@ class KeyboardOverlay extends React.Component {
                 </div>
                 <div
                     style={{
-                        position: 'absolute',
-                        top: `${this.props.stageHeight - 70}px`,
-                        right: `10px`,
-                        width: `60px`,
-                        height: `60px`,
-                        overflow: 'hidden',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        background: '#e5f0ff4a',
-                        borderRadius: '60px'
+                        margin: '10px'
                     }}
                 >
-                    <a
+
+                    <img
                         ref={attackKey => {
                             this.attackKey = attackKey;
                         }}
+                        src={iconEnter}
+                        style={{
+                            width: '80px',
+                            height: '80px',
+                            cursor: 'pointer',
+                            opacity: '1'
+                        }}
                         onClick={this.handleAttack}
-                    >
-                        <img
-                            src={iconEnter}
-                            style={{
-                                width: '60px',
-                                height: '60px',
-                                cursor: 'pointer',
-                                opacity: '0.6'
-                            }}
-                        />
-                    </a>
+                    />
                 </div>
             </div>
         );

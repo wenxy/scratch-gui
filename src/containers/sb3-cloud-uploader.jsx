@@ -4,7 +4,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {projectTitleInitialState} from '../reducers/project-title';
 import saveCloudBlob from '../lib/save-cloud-blob';
-import {Message} from '@alifd/next';
+import {Message, Dialog} from '@alifd/next';
 /**
  * Project saver component passes a downloadProject function to its child.
  * It expects this child to be a function with the signature
@@ -32,7 +32,7 @@ class SB3SaveCloud extends React.Component {
                 title: '请先登录...',
                 type: 'notice',
                 hasMask: true,
-                duration: 3
+                duration: 3000
             });
             return;
         }
@@ -41,7 +41,49 @@ class SB3SaveCloud extends React.Component {
             if (this.props.onSaveFinished) {
                 this.props.onSaveFinished();
             }
-            saveCloudBlob(this.props.projectId, this.props.projectFilename, content);
+            saveCloudBlob(window.projectId || 0, this.props.projectFilename, content, data => {
+                // const search = window.location.search;
+                const playCodeUrl = (
+                    <img
+                        src={data.playQrCodeURl}
+                        style={{
+                            width: `200px`,
+                            height: '200px'
+                        }}
+                    />
+                );
+
+                Dialog.show({
+                    title: '请微信扫码，完成打卡',
+                    content: playCodeUrl,
+                    closeable: false,
+                    onOk: () => {
+                        Message.hide();
+                        if (this.props.projectId === data.projectId) {
+                            console.log('地址栏存在projectId参数，不跳转');
+                        } else {
+                            window.projectId = data.projectId;
+                        }
+                    },
+                    onCancel: () => {
+                        Message.hide();
+                        if (this.props.projectId === data.projectId) {
+                            console.log('地址栏存在projectId参数，不跳转');
+                        } else {
+                            window.projectId = data.projectId;
+                        }
+                        /* else {
+                            window.onbeforeunload = () => {}
+                            const href = window.location.href;
+                            if (href.indexOf('?') === -1) {
+                                window.location.href = `${href}?projectId=${data.projectId}`;
+                            } else {
+                                window.location.href = `${href}&projectId=${data.projectId}`;
+                            }
+                        } */
+                    }
+                });
+            });
         });
     }
     render () {
@@ -86,11 +128,15 @@ SB3SaveCloud.defaultProps = {
 const mapStateToProps = state => ({
     saveProjectSb3: state.scratchGui.vm.saveProjectSb3.bind(state.scratchGui.vm),
     isLogined: !!state.session,
-    projectId: getProjectId(state.scratchGui.projectId,'0'),
+    projectId: getProjectId(state.scratchGui.projectId, '0'),
     projectFilename: getProjectFilename(state.scratchGui.projectTitle, projectTitleInitialState)
 });
+const mapDispatchToProps = dispatch => ({
+    // onSetProjectUnchanged: () => dispatch(setProjectUnchanged())
+});
+
 
 export default connect(
     mapStateToProps,
-    () => ({}) // omit dispatch prop
+    mapDispatchToProps
 )(SB3SaveCloud);

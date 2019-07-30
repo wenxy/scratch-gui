@@ -1,6 +1,15 @@
 import cookies from 'js-cookie';
 import {http} from './HttpUtil';
-import {loginByAccountPath, checkSessionPath, loginOutPath, regByAccountPath, getWeixinLoginQRcodePath, checkWxLoginPath} from './URLs';
+import {
+    loginByAccountPath,
+    checkSessionPath,
+    loginOutPath,
+    smileOrCryPath,
+    regByAccountPath,
+    getWeixinLoginQRcodePath,
+    checkWxLoginPath,
+    getProjectInfoPath
+} from './URLs';
 
 const loginByAccount = function (userName, password) {
     if (typeof userName === 'undefined' || typeof password === 'undefined') {
@@ -38,14 +47,14 @@ const regByAccount = function (userName, password) {
                 reject(error);
             });
     }));
-}
+};
 
 const checkSession = function () {
     const sid = cookies.get('sweet_sid');
-    console.log('check session sid->', sid);
+    // console.log('check session sid->', sid);
     if (typeof sid === 'undefined') {
         return new Promise((resolve, reject) => {
-            reject(`未登录`);
+            resolve(null);
         });
     }
     return new Promise(((resolve, reject) => {
@@ -55,10 +64,10 @@ const checkSession = function () {
             resolve(data);
         })
             .catch(error => {
-                reject(error);
+                resolve(null);
             });
     }));
-}
+};
 
 const getWeixinLoginQRcode = function () {
     return new Promise(((resolve, reject) => {
@@ -70,7 +79,7 @@ const getWeixinLoginQRcode = function () {
                 reject(error);
             });
     }));
-}
+};
 
 const loginOut = function () {
     const sid = cookies.get('sweet_sid');
@@ -91,7 +100,7 @@ const loginOut = function () {
                 reject(error);
             });
     }));
-}
+};
 
 const checkWxLogin = function (uuid) {
     if (typeof uuid === 'undefined') {
@@ -110,12 +119,60 @@ const checkWxLogin = function (uuid) {
                 reject(error);
             });
     }));
-}
+};
+
+const getProjectInfo = function (projectId) {
+    if (typeof projectId === 'undefined') {
+        return new Promise((resolve, reject) => {
+            reject(`projectId Id is empty.`);
+        });
+    }
+    return new Promise(((resolve, reject) => {
+        http.post(getProjectInfoPath, {
+            projectId: projectId
+        }).then(data => {
+            resolve(data);
+        })
+            .catch(error => {
+                reject(error);
+            });
+    }));
+};
+
+const smileOrCry = function (projectId, flag) {
+    if (typeof projectId === 'undefined') {
+        return new Promise((resolve, reject) => {
+            reject(`smileOrCry projectId Id is empty.`);
+        });
+    }
+    const sid = cookies.get('sweet_sid');
+    // console.log('check session sid->', sid);
+    if (typeof sid === 'undefined') {
+        return new Promise((resolve, reject) => {
+            reject(`未登录`);
+        });
+    }
+    return new Promise(((resolve, reject) => {
+        http.post(smileOrCryPath, {
+            projectId: projectId,
+            flag: flag,
+            sid: sid
+        }).then(data => {
+            resolve(data);
+        })
+            .catch(error => {
+                reject(error);
+            });
+    }));
+};
+
 export {
     loginByAccount as loginByAccountService,
     checkSession as checkSessionService,
     loginOut as loginOutService,
     regByAccount as regByAccountService,
     getWeixinLoginQRcode as getWeixinLoginQRcodeService,
-    checkWxLogin as checkWxLoginService
+    checkWxLogin as checkWxLoginService,
+    getProjectInfo as getProjectInfoService,
+    smileOrCry as smileOrCryService
 };

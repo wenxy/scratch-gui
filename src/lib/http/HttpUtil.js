@@ -6,6 +6,7 @@ import QS from 'qs';
 const http = axios.create({
     baseURL: baseURL,
     timeout: 5000,
+    withCredentials: true,
     transformRequest: data => {
         if (data instanceof FormData){
             return data;
@@ -14,7 +15,7 @@ const http = axios.create({
     }
 });
 http.interceptors.request.use(config => {
-    config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    config.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
     return config;
 }, error => {
     log.error(`request error ${error}`);

@@ -18,6 +18,8 @@ import {
     deactivateColorPicker
 } from '../reducers/color-picker';
 
+import KeyboardOverlay from './keyboard-overlay.jsx';
+
 const colorPickerRadius = 20;
 const dragThreshold = 3; // Same as the block drag threshold
 
@@ -407,15 +409,22 @@ class Stage extends React.Component {
             ...props
         } = this.props;
         return (
-            <StageComponent
-                canvas={this.canvas}
-                colorInfo={this.state.colorInfo}
-                dragRef={this.setDragCanvas}
-                question={this.state.question}
-                onDoubleClick={this.handleDoubleClick}
-                onQuestionAnswered={this.handleQuestionAnswered}
-                {...props}
-            />
+            <div>
+                <StageComponent
+                    canvas={this.canvas}
+                    colorInfo={this.state.colorInfo}
+                    dragRef={this.setDragCanvas}
+                    question={this.state.question}
+                    onDoubleClick={this.handleDoubleClick}
+                    onQuestionAnswered={this.handleQuestionAnswered}
+                    {...props}
+                />
+                {this.props.isStarted ? (
+                    <KeyboardOverlay />
+                ) : null
+                }
+
+            </div>
         );
     }
 }

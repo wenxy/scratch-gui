@@ -7,6 +7,8 @@ const loginOutPath = 'user/login/out';
 const regByAccountPath = 'user/reg/byaccount';
 const getWeixinLoginQRcodePath = '/user/login/wxqcode';
 const checkWxLoginPath = '/user/login/try';
+const getProjectInfoPath = '/project/load';
+const smileOrCryPath = '/project/simleOrCry';
 export {
     baseURL,
     uploadPath,
@@ -16,5 +18,7 @@ export {
     loginOutPath,
     regByAccountPath,
     getWeixinLoginQRcodePath,
-    checkWxLoginPath
+    checkWxLoginPath,
+    getProjectInfoPath,
+    smileOrCryPath
 };

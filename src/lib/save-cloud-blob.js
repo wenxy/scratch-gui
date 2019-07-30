@@ -4,13 +4,14 @@ import {http} from './http/HttpUtil';
 import log from '../lib/log';
 import cookies from 'js-cookie';
 
-export default (projectId, filename, blob) => {
+export default (projectId, filename, blob, callback) => {
     // console.log('save cloud blob , filename', blob ,filename);
     const formData = new FormData();
     formData.append('file', blob);
     formData.append('projectId', projectId)
     formData.append('fileName', filename);
     formData.append('sid',cookies.get('sweet_sid'));
+    console.log('=====>save to cloud, size = ',blob.size, ',type = ', blob.type)
     Message.show({
         type: 'loading',
         title: '提交作业',
@@ -19,9 +20,11 @@ export default (projectId, filename, blob) => {
         shape: 'toast',
         duration: 0
     })
+
     http.post(uploadPath, formData)
         .then(data => {
             log.debug(`save sb to cloud. ${data}`);
+
             Message.show({
                 type: 'success',
                 title: '提交作业',
@@ -29,6 +32,8 @@ export default (projectId, filename, blob) => {
                 hasMask: true,
                 shape: 'toast'
             });
+
+            callback(data);
         })
         .catch(() => {
             Message.show({

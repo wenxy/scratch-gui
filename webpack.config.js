@@ -187,7 +187,7 @@ module.exports = [
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'player'],
-                template: 'src/playground/index.ejs',
+                template: 'src/playground/player.ejs',
                 filename: 'player.html',
                 title: '甜甜圈编程-作品详情',
                 host: apiHost
