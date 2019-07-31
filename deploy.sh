@@ -10,6 +10,7 @@ zip -r scratch.zip *
 
 echo 'copy scratch static assert to wxProject'
 cp -R /Users/wenxiaoyu/workspace/kuku/coding/scratch/fork-scratch-gui/scratch-gui/build/static /Users/wenxiaoyu/workspace/kuku/coding/ykm/ykm-weixin/src/main/resources/static/view/scratch
+cp -R /Users/wenxiaoyu/workspace/kuku/coding/scratch/fork-scratch-gui/scratch-gui/build/static /Users/wenxiaoyu/workspace/kuku/coding/flutter/scratch-server/src/main/resources/static/learn/scratch
 echo 'copy scratch static assert to wxProject done!!!'
 
 echo '拷贝scratch.zip 到远程服务器'
